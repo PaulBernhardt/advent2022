@@ -28,15 +28,21 @@ pub fn solve_b(contents: &str) -> i32 {
         .zip(1..53)
         .collect::<HashMap<char, i32>>();
 
+    let mut lines = contents.lines();
     let mut total = 0;
-    for line in contents.lines() {
-        let (left, right) = line.split_at(line.len() / 2);
-        let left_index = left.chars().collect::<HashSet<char>>();
 
-        for char in right.chars() {
-            if left_index.contains(&char) {
-                total = total + item_map.get(&char).unwrap();
-                break;
+    while let Some(a) = lines.next() {
+        if let Some(b) = lines.next() {
+            if let Some(c) = lines.next() {
+                let a_index = a.chars().collect::<HashSet<char>>();
+                let b_index = b.chars().collect::<HashSet<char>>();
+
+                for char in c.chars() {
+                    if a_index.contains(&char) && b_index.contains(&char) {
+                        total = total + item_map.get(&char).unwrap();
+                        break;
+                    }
+                }
             }
         }
     }
