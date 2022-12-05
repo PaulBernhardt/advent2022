@@ -13,13 +13,13 @@ pub fn solve_a(contents: &str) -> i32 {
 
         for char in right.chars() {
             if left_index.contains(&char) {
-                total = total + item_map.get(&char).unwrap();
+                total += item_map.get(&char).unwrap();
                 break;
             }
         }
     }
 
-    return total;
+    total
 }
 
 pub fn solve_b(contents: &str) -> i32 {
@@ -39,7 +39,7 @@ pub fn solve_b(contents: &str) -> i32 {
 
                 for char in c.chars() {
                     if a_index.contains(&char) && b_index.contains(&char) {
-                        total = total + item_map.get(&char).unwrap();
+                        total += item_map.get(&char).unwrap();
                         break;
                     }
                 }
@@ -47,7 +47,7 @@ pub fn solve_b(contents: &str) -> i32 {
         }
     }
 
-    return total;
+    total
 }
 
 #[cfg(test)]
