@@ -108,7 +108,7 @@ impl FromStr for RPSRound {
             let rps = RPSRound::build(opponent, you, result)?;
             Ok(rps)
         } else {
-            return Err(format!("Invalid line: {s}"));
+            Err(format!("Invalid line: {s}"))
         }
     }
 }
@@ -119,7 +119,7 @@ pub fn solve_a(contents: &str) -> i32 {
         let result = line.parse::<RPSRound>();
         match result {
             Ok(round) => {
-                score = score + round.a;
+                score += round.a;
             }
             Err(_) => {
                 panic!("This shouldn't happen");
@@ -127,7 +127,7 @@ pub fn solve_a(contents: &str) -> i32 {
         }
     }
 
-    return score;
+    score
 }
 
 pub fn solve_b(contents: &str) -> i32 {
@@ -136,7 +136,7 @@ pub fn solve_b(contents: &str) -> i32 {
         let result = line.parse::<RPSRound>();
         match result {
             Ok(round) => {
-                score = score + round.b;
+                score += round.b;
             }
             Err(_) => {
                 panic!("This shouldn't happen");
@@ -144,5 +144,5 @@ pub fn solve_b(contents: &str) -> i32 {
         }
     }
 
-    return score;
+    score
 }

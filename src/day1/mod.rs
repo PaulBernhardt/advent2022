@@ -6,7 +6,7 @@ pub fn solve_a(contents: &str) -> i32 {
         match result {
             Ok(num) => {
                 // println!("{}", num);
-                current = current + num
+                current += num
             }
             Err(_) => {
                 totals.push(current);
@@ -16,7 +16,7 @@ pub fn solve_a(contents: &str) -> i32 {
     }
     totals.sort_unstable_by(|a, b| b.cmp(a));
 
-    return totals[0];
+    totals[0]
 }
 
 pub fn solve_b(contents: &str) -> i32 {
@@ -27,7 +27,7 @@ pub fn solve_b(contents: &str) -> i32 {
         match result {
             Ok(num) => {
                 // println!("{}", num);
-                current = current + num
+                current += num
             }
             Err(_) => {
                 totals.push(current);
@@ -37,5 +37,5 @@ pub fn solve_b(contents: &str) -> i32 {
     }
     totals.sort_unstable_by(|a, b| b.cmp(a));
 
-    return totals[0] + totals[1] + totals[2];
+    totals[0] + totals[1] + totals[2]
 }
