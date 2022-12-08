@@ -150,7 +150,7 @@ pub fn solve_b(contents: &str) -> Result<String, String> {
     let directories = calc_directory_size(contents)?;
     let total_space = 70000000;
     let needed_space = 30000000;
-    let root = directories.get("/").unwrap();
+    let root = directories.get("/0").unwrap();
     let used_space = total_space - root.size;
     let target = needed_space - used_space;
 

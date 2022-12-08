@@ -5,6 +5,7 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
 
 use std::error::Error;
 use std::fs;
@@ -75,6 +76,20 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         Err(a) => println!("  a: {}", a),
     };
     let b = day7::solve_b(&contents);
+    match b {
+        Ok(b) => println!("  b: {}", b),
+        Err(b) => println!("  b: {}", b),
+    };
+    println!();
+
+    let contents = fs::read_to_string("./input/day8.txt")?;
+    println!("8:");
+    let a = day8::solve_a(&contents);
+    match a {
+        Ok(a) => println!("  a: {}", a),
+        Err(a) => println!("  a: {}", a),
+    };
+    let b = day8::solve_b(&contents);
     match b {
         Ok(b) => println!("  b: {}", b),
         Err(b) => println!("  b: {}", b),
