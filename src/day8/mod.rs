@@ -1,6 +1,57 @@
 use std::collections::HashSet;
 
-type Forest = Vec<Vec<i32>>;
+type Tree = i32;
+type Forest = Vec<Vec<Tree>>;
+
+enum Direction {
+    Right,
+    Left,
+    Down,
+    Up,
+}
+
+struct ForestIter<'a> {
+    forest: &'a Forest,
+    row: isize,
+    col: isize,
+    row_add: isize,
+    col_add: isize,
+}
+
+impl<'a> ForestIter<'a> {
+    fn new(forest: &'a Forest, row: usize, col: usize, direction: &Direction) -> Self {
+        let mut row_add = 0;
+        let mut col_add = 0;
+        let row = row as isize;
+        let col = col as isize;
+        match direction {
+            Direction::Right => col_add = 1,
+            Direction::Left => col_add = -1,
+            Direction::Down => row_add = 1,
+            Direction::Up => row_add = -1,
+        };
+        ForestIter {
+            forest,
+            row,
+            col,
+            row_add,
+            col_add,
+        }
+    }
+}
+
+impl<'a> Iterator for ForestIter<'a> {
+    type Item = Tree;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.row += self.row_add;
+        self.col += self.col_add;
+        let row = self.forest.get(self.row as usize);
+        if let Some(row) = row {
+            return row.get(self.col as usize).copied();
+        }
+        None
+    }
+}
 
 fn parse_input(contents: &str) -> Result<Forest, String> {
     let mut forest: Forest = Vec::new();
@@ -89,8 +140,35 @@ pub fn solve_a(contents: &str) -> Result<String, String> {
     Ok(format!("{}", visible.len()))
 }
 
-pub fn solve_b(_contents: &str) -> Result<String, String> {
-    Err("Not implemented".to_string())
+pub fn solve_b(contents: &str) -> Result<String, String> {
+    let trees = parse_input(contents)?;
+    let dirs = [
+        Direction::Up,
+        Direction::Down,
+        Direction::Left,
+        Direction::Right,
+    ];
+    let mut max = 0;
+    for r in 1..(trees.len() - 1) {
+        let row = &trees[r];
+        for (c, tree) in row.iter().enumerate().take(row.len() - 1).skip(1) {
+            let mut total = 1;
+            for direction in &dirs {
+                let iter = ForestIter::new(&trees, r, c, direction);
+                let mut count = 0;
+
+                for seen_tree in iter {
+                    count += 1;
+                    if seen_tree >= *tree {
+                        break;
+                    }
+                }
+                total *= count;
+            }
+            max = std::cmp::max(max, total);
+        }
+    }
+    Ok(format!("{}", max))
 }
 
 #[cfg(test)]
@@ -118,7 +196,7 @@ mod tests {
 33549
 35390";
         let result = solve_b(contents);
-        assert_eq!(result.unwrap(), "CMZ");
+        assert_eq!(result.unwrap(), "8");
     }
 
     #[test]
