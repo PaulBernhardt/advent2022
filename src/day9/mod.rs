@@ -84,21 +84,30 @@ pub fn solve_a(contents: &str) -> Result<String, String> {
     Ok(format!("{}", visited.len()))
 }
 
-pub fn solve_b(_contents: &str) -> Result<String, String> {
+pub fn solve_b(contents: &str) -> Result<String, String> {
     let steps = parse_steps(contents)?;
     let mut visited: HashSet<Point> = HashSet::new();
 
-    let knots = vec![ Point(0, 0); 10];
+    let mut knots = vec![Point(0, 0); 10];
     for step in steps {
         let movement = step.point;
+
         for _ in 0..step.distance {
-            head = head + movement;
-            tail = tail + head.compare(tail);
-            visited.insert(tail);
+            knots[0] = knots[0] + movement;
+            for i in 1..knots.len() {
+                let head = knots[i - 1];
+                let mut tail = knots[i];
+                tail = tail + head.compare(tail);
+
+                if i == knots.len() - 1 {
+                    visited.insert(tail);
+                }
+                knots[i - 1] = head;
+                knots[i] = tail;
+            }
         }
     }
     Ok(format!("{}", visited.len()))
-}
 }
 
 #[cfg(test)]
