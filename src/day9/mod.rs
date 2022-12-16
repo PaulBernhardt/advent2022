@@ -1,47 +1,55 @@
 use std::{collections::HashSet, ops::Add, str::FromStr};
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 struct Point(i32, i32);
-impl HasPoint for Point {
-    fn getPoint(&self) -> Point {
-        *self
+
+impl Point {
+    fn compare(&self, other: Point) -> Point {
+        let delta_x = other.0 - self.0;
+        let delta_y = other.1 - self.1;
+        if delta_x.abs() <= 1 && delta_y.abs() <= 1 {
+            return Point(0, 0);
+        }
+        let x = if delta_x > 0 {
+            -1
+        } else {
+            i32::from(delta_x < 0)
+        };
+        let y = if delta_y > 0 {
+            -1
+        } else {
+            i32::from(delta_y < 0)
+        };
+        Point(x, y)
     }
 }
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 struct Step {
     point: Point,
-    steps: i32,
-}
-impl HasPoint for Step {
-    fn getPoint(&self) -> Point {
-        self.point
-    }
-}
-
-trait HasPoint {
-    fn getPoint(&self) -> Point;
+    distance: i32,
 }
 
 impl Add for Point {
-    fn add(self, other: dyn HasPoint) -> Point {
-        let other = other.getPoint();
-        (self.0 + other.0, self.1 + other.1)
+    type Output = Point;
+    fn add(self, other: Point) -> Point {
+        Point(self.0 + other.0, self.1 + other.1)
     }
 }
 
 impl FromStr for Step {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (dir, steps) = s.split_once(' ').unwrap_or_default();
-        if let Ok(steps) = steps.parse::<i32>() {
-            let (x, y) = match dir {
-                "R" => (0, 1),
-                "L" => (0, -1),
-                "D" => (1, 0),
-                "U" => (-1, 9),
-                _ => (0, 0),
+        let (dir, distance) = s.split_once(' ').unwrap_or_default();
+        if let Ok(distance) = distance.parse::<i32>() {
+            let point = match dir {
+                "R" => Point(0, 1),
+                "L" => Point(0, -1),
+                "D" => Point(1, 0),
+                "U" => Point(-1, 0),
+                _ => Point(0, 0),
             };
-            Ok(Self { x, y, steps })
+            Ok(Self { point, distance })
         } else {
             Err(format!("Invalid input! {}", s))
         }
@@ -61,18 +69,36 @@ fn parse_steps(contents: &str) -> Result<Steps, String> {
 
 pub fn solve_a(contents: &str) -> Result<String, String> {
     let steps = parse_steps(contents)?;
-    let visited: HashSet<Point> = HashSet::new();
+    let mut visited: HashSet<Point> = HashSet::new();
 
-    let mut head = (0, 0);
-    let mut tail = (0, 0);
+    let mut head = Point(0, 0);
+    let mut tail = Point(0, 0);
     for step in steps {
-        head = head + (step.x, step.y);
+        let movement = step.point;
+        for _ in 0..step.distance {
+            head = head + movement;
+            tail = tail + head.compare(tail);
+            visited.insert(tail);
+        }
     }
-    Err("Not implemented".to_string())
+    Ok(format!("{}", visited.len()))
 }
 
 pub fn solve_b(_contents: &str) -> Result<String, String> {
-    Err("Not implemented".to_string())
+    let steps = parse_steps(contents)?;
+    let mut visited: HashSet<Point> = HashSet::new();
+
+    let knots = vec![ Point(0, 0); 10];
+    for step in steps {
+        let movement = step.point;
+        for _ in 0..step.distance {
+            head = head + movement;
+            tail = tail + head.compare(tail);
+            visited.insert(tail);
+        }
+    }
+    Ok(format!("{}", visited.len()))
+}
 }
 
 #[cfg(test)]
@@ -97,15 +123,15 @@ R 2";
     #[test]
     fn test_b() {
         let contents = "\
-R 4
-U 4
-L 3
-D 1
-R 4
-D 1
-L 5
-R 2";
+R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20";
         let result = solve_b(contents);
-        assert_eq!(result.unwrap(), "CMZ");
+        assert_eq!(result.unwrap(), "36");
     }
 }
