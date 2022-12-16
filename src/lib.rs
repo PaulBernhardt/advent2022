@@ -1,5 +1,6 @@
 mod day1;
 mod day10;
+mod day11;
 mod day2;
 mod day3;
 mod day4;
@@ -146,6 +147,22 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     };
     let time = Instant::now();
     let b = day10::solve_b(&contents);
+    match b {
+        Ok(b) => println!("  b: {} ({:?})", b, time.elapsed()),
+        Err(b) => println!("  b: {}", b),
+    };
+    println!();
+
+    let contents = fs::read_to_string("./input/day11.txt")?;
+    println!("11:");
+    let time = Instant::now();
+    let a = day11::solve_a(&contents);
+    match a {
+        Ok(a) => println!("  a: {} ({:?})", a, time.elapsed()),
+        Err(a) => println!("  a: {}", a),
+    };
+    let time = Instant::now();
+    let b = day11::solve_b(&contents);
     match b {
         Ok(b) => println!("  b: {} ({:?})", b, time.elapsed()),
         Err(b) => println!("  b: {}", b),
