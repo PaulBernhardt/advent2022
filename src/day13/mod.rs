@@ -22,6 +22,39 @@ impl Display for Packet {
     }
 }
 
+impl PartialOrd for Packet {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Packet {
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
+        let pair = (self, other);
+        match pair {
+            (Packet::Packet(first), Packet::Packet(second)) => {
+                let first_len = first.len();
+                let second_len = second.len();
+                let iters = first.iter().zip(second);
+                for new_pair in iters {
+                    let order = new_pair.0.cmp(new_pair.1);
+                    if order != cmp::Ordering::Equal {
+                        return order;
+                    }
+                }
+                first_len.cmp(&second_len)
+            }
+            (Packet::Packet(_), Packet::Int(second)) => {
+                pair.0.cmp(&Packet::Packet(vec![Packet::Int(*second)]))
+            }
+            (Packet::Int(first), Packet::Packet(_)) => {
+                Packet::Packet(vec![Packet::Int(*first)]).cmp(pair.1)
+            }
+            (Packet::Int(first), Packet::Int(second)) => first.cmp(second),
+        }
+    }
+}
+
 type Pair = (Packet, Packet);
 
 fn parse_line(chars: &mut Chars) -> Result<Packet, String> {
@@ -56,40 +89,13 @@ fn parse_lines(contents: &str) -> Result<Vec<Pair>, String> {
     Ok(pairs)
 }
 
-fn compare_packets(pair: Pair) -> cmp::Ordering {
-    println!("Compare {} vs {}", pair.0, pair.1);
-    match pair {
-        (Packet::Packet(first), Packet::Packet(second)) => {
-            let first_len = first.len();
-            let second_len = second.len();
-            let iters = first.into_iter().zip(second);
-            for new_pair in iters {
-                let order = compare_packets(new_pair);
-                if order != cmp::Ordering::Equal {
-                    return order;
-                }
-            }
-            first_len.cmp(&second_len)
-        }
-        (Packet::Packet(first), Packet::Int(second)) => compare_packets((
-            Packet::Packet(first),
-            Packet::Packet(vec![Packet::Int(second)]),
-        )),
-        (Packet::Int(first), Packet::Packet(second)) => compare_packets((
-            Packet::Packet(vec![Packet::Int(first)]),
-            Packet::Packet(second),
-        )),
-        (Packet::Int(first), Packet::Int(second)) => first.cmp(&second),
-    }
-}
-
 pub fn solve_a(contents: &str) -> Result<String, String> {
     let mut pairs = parse_lines(contents)?;
     let mut total = 0;
     let mut index = pairs.len();
     while let Some(pair) = pairs.pop() {
-        if compare_packets(pair) == cmp::Ordering::Less {
-            println!("Pair {index} is in order");
+        if pair.0.cmp(&pair.1) == cmp::Ordering::Less {
+            // println!("Pair {index} is in order");
             total += index;
         }
         index -= 1;
@@ -97,8 +103,23 @@ pub fn solve_a(contents: &str) -> Result<String, String> {
     Ok(format!("{}", total))
 }
 
-pub fn solve_b(_contents: &str) -> Result<String, String> {
-    Err("Not implemented".to_string())
+pub fn solve_b(contents: &str) -> Result<String, String> {
+    let mut pairs = parse_lines(contents)?;
+    let div1 = parse_line(&mut "[[2]]".chars())?;
+    let div2 = parse_line(&mut "[[6]]".chars())?;
+    let mut lines = vec![div1, div2];
+
+    while let Some(pair) = pairs.pop() {
+        lines.push(pair.0);
+        lines.push(pair.1);
+    }
+
+    lines.sort();
+    let div1 = parse_line(&mut "[[2]]".chars())?;
+    let div2 = parse_line(&mut "[[6]]".chars())?;
+    let total = (1 + lines.binary_search(&div1).map_err(|_| "Can't find [[2]]")?)
+        * (1 + lines.binary_search(&div2).map_err(|_| "Can't find [[6]]")?);
+    Ok(format!("{}", total))
 }
 
 #[cfg(test)]
@@ -307,6 +328,6 @@ mod tests {
 [1,[2,[3,[4,[5,6,7]]]],8,9]
 [1,[2,[3,[4,[5,6,0]]]],8,9]";
         let result = solve_b(contents);
-        assert_eq!(result.unwrap(), "13");
+        assert_eq!(result.unwrap(), "140");
     }
 }
