@@ -121,23 +121,29 @@ pub fn solve_b(contents: &str) -> Result<String, String> {
 
     let max = if max < 50 { 20 } else { 4000000 }; // Switch between test row and real row
 
-    for x in 0..=max {
-        for y in 0..=max {
+    let mut x = 0;
+    while x <= max {
+        let mut y = 0;
+        while y <= max {
             let point = Point(x, y);
             if beacons.contains(&point) {
                 continue;
             }
             let mut possible = true;
             for sensor in sensors.iter() {
-                if point.dist(sensor.point) <= sensor.range {
+                let skip = sensor.range - point.dist(sensor.point);
+                if skip >= 0 {
                     possible = false;
+                    y += skip;
                     break;
                 }
             }
             if possible {
                 return Ok(format!("{}", point.1 * 4000000 + point.0));
             }
+            y += 1;
         }
+        x += 1;
     }
     Err("Couldn't find point".to_string())
 }
